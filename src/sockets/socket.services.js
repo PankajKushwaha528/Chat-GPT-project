@@ -3,6 +3,9 @@ const cookie = require('cookie');
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.model");
 const aiService = require("../services/ai.service");
+const messageModel = require("../models/message.model");
+
+
 function initSocketServer(httpServer){
     const io = new Server(httpServer, {});
 
@@ -34,10 +37,49 @@ function initSocketServer(httpServer){
         socket.on("ai-message", async (payload) => {
             console.log("AI message received:", payload);
 
-            const response = await aiService.generateAIResponse(payload.content);
+            // Save user message to DB
+            await messageModel.create({
+                chat: payload.chat,
+                user: socket.user._id,
+                content: payload.content,
+                role: "user",
+            });
+            const chatHistory = (await messageModel.find({
+                chat: payload.chat,
+            }).sort({ createdAt: -1 }).limit(20).lean()).reverse()
 
-            socket.emit("ai-response", { 
+            // console.log("Chat history:", chatHistory.map(m =>{
+            //     return {
+            //         role: m.role,
+            //         parts:[{
+            //             text: m.content
+            //         }]
+            //     }
+
+            // }));
+            // Generate AI response
+            const response = await aiService.generateAIResponse(
+                chatHistory.map(msg => {
+                    return {
+                        role: msg.role,
+                        parts:[{
+                            text: msg.content
+                        }]
+                    }
+                })
+            );
+
+            // Save AI message to DB
+            await messageModel.create({
+                chat: payload.chat,
+                user: socket.user._id,// You might want to use a different user ID for the AI
                 content: response,
+                role: "model",
+            });
+
+            console.log("AI response generated:", response);
+            socket.emit("ai-response", { 
+                content: response, 
                 chat: payload.chat 
             }); 
         });
