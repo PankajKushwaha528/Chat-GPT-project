@@ -55,8 +55,13 @@ function initSocketServer(httpServer){
              const memory = await queryMemory({
                 queryVector: vectors,
                 limit: 3,
-                metadata: {}
+               metadata: {
+                    // user: socket.user._id,
+                },
+                
+                
             })
+            // console.log("User attached to socket:", user._id.toString()),
             await createMemory({
                 vectors: vectors,
                 messageId: message._id,
@@ -75,9 +80,7 @@ function initSocketServer(httpServer){
                 chat: payload.chat,
             }).sort({ createdAt: -1 }).limit(20).lean()).reverse();
 
-            // Generate AI response
-            const response = await aiService.generateAIResponse(
-                chatHistory.map(msg => {
+            const stm =  chatHistory.map(msg => {
                     return {
                         role: msg.role,
                         parts:[{
@@ -85,7 +88,18 @@ function initSocketServer(httpServer){
                         }]
                     }
                 })
-            );
+
+            const ltm = [
+                {
+                    role:'user',
+                    parts:[{
+                        text: ` These are previous message from the chat use them to generate a response
+                            ${memory.map(item => item.metadata.text).join('\n')} `
+                    }] 
+                }
+            ]
+            // Generate AI response
+            const response = await aiService.generateAIResponse([...ltm , ...stm]);
 
             // Save AI message to DB
 
