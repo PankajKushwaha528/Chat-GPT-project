@@ -4,7 +4,8 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.model");
 const aiService = require("../services/ai.service");
 const messageModel = require("../models/message.model");
-
+const {createMemory,queryMemory} = require("../services/vector.service");
+const { text } = require("express");
 
 function initSocketServer(httpServer){
     const io = new Server(httpServer, {});
@@ -38,25 +39,42 @@ function initSocketServer(httpServer){
             console.log("AI message received:", payload);
 
             // Save user message to DB
-            await messageModel.create({
+
+            const message = await messageModel.create({
                 chat: payload.chat,
                 user: socket.user._id,
                 content: payload.content,
                 role: "user",
-            });
+            }); 
+
+            
+            const vectors = await aiService.generateVector(payload.content);
+            console.log("Generated vectors:", vectors);
+            
+            // Save vector to Pinecone
+             const memory = await queryMemory({
+                queryVector: vectors,
+                limit: 3,
+                metadata: {}
+            })
+            await createMemory({
+                vectors: vectors,
+                messageId: message._id,
+                metadata: {
+                    chat: payload.chat,
+                    user: socket.user._id,
+                    text: payload.content
+                }
+            })
+
+
+
+            console.log(memory)
+            // Retrieve chat history
             const chatHistory = (await messageModel.find({
                 chat: payload.chat,
-            }).sort({ createdAt: -1 }).limit(20).lean()).reverse()
+            }).sort({ createdAt: -1 }).limit(20).lean()).reverse();
 
-            // console.log("Chat history:", chatHistory.map(m =>{
-            //     return {
-            //         role: m.role,
-            //         parts:[{
-            //             text: m.content
-            //         }]
-            //     }
-
-            // }));
             // Generate AI response
             const response = await aiService.generateAIResponse(
                 chatHistory.map(msg => {
@@ -70,13 +88,26 @@ function initSocketServer(httpServer){
             );
 
             // Save AI message to DB
-            await messageModel.create({
+
+            const responseMessage =  await messageModel.create({
                 chat: payload.chat,
                 user: socket.user._id,// You might want to use a different user ID for the AI
                 content: response,
                 role: "model",
             });
 
+           const responseVectors = await aiService.generateVector(response)
+
+            await createMemory({
+                vectors: responseVectors,
+                messageId: responseMessage._id,
+                metadata: {
+                    chat: payload.chat,
+                    user: socket.user._id,
+                    text: response
+                }
+            })
+ 
             console.log("AI response generated:", response);
             socket.emit("ai-response", { 
                 content: response, 
