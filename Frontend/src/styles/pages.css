@@ -1,0 +1,107 @@
+:root {
+  --bg: #0f1724;
+  --card-bg: #0b1220;
+  --text: #e6eef8;
+  --muted: #9fb0c8;
+  --accent: #4f46e5;
+  --accent-2: #06b6d4;
+  --radius: 12px;
+  --shadow: 0 6px 18px rgba(2,6,23,0.6);
+}
+
+/* Light theme overrides (prefers-color-scheme) */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7fbff;
+    --card-bg: #ffffff;
+    --text: #0b1220;
+    --muted: #536b82;
+    --accent: #3366ff;
+    --accent-2: #0ea5a4;
+    --shadow: 0 8px 24px rgba(15,23,42,0.06);
+  }
+}
+
+/* Also support a manual class toggle on <html> for explicit theme switching */
+html.light {
+  --bg: #f7fbff;
+  --card-bg: #ffffff;
+  --text: #0b1220;
+  --muted: #536b82;
+  --accent: #3366ff;
+  --accent-2: #0ea5a4;
+  --shadow: 0 8px 24px rgba(15,23,42,0.06);
+}
+
+/* Utility layout */
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+
+.page{min-height:100vh;padding:24px}
+.page--centered{display:flex;align-items:center;justify-content:center;padding:28px}
+
+.card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;max-width:520px;width:100%}
+.auth-card{padding:20px}
+.card__title{margin:0 0 14px 0;font-size:20px}
+
+.form{display:flex;flex-direction:column;gap:12px}
+/* Stack inputs vertically by default (mobile-first). On larger screens use row layout */
+.form__row{display:flex;flex-direction:column;gap:12px}
+.form__label{display:flex;flex-direction:column;font-size:13px}
+.form__labelText{color:var(--muted);margin-bottom:6px}
+.form__input{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:12px 14px;border-radius:10px;color:var(--text);outline:none;min-width:0}
+.form__label{min-width:0}
+.form__input::placeholder{color:rgba(255,255,255,0.32)}
+
+.btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--text);text-decoration:none;cursor:pointer}
+.btn--primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white}
+
+.theme-toggle{padding:8px 10px;font-size:13px;border-radius:8px}
+
+/* Fixed header for global controls (top-right) */
+.app-header{position:fixed;right:12px;top:12px;z-index:60}
+.app-header__inner{display:flex;align-items:center;gap:8px}
+
+@media(max-width:420px){
+  .app-header{right:8px;top:8px}
+  .theme-toggle{padding:6px 8px;font-size:12px}
+}
+
+.muted{color:var(--muted);font-size:13px;margin-top:12px}
+
+.hero{display:flex;align-items:center;justify-content:center;min-height:60vh}
+.hero__inner{text-align:center}
+.hero__title{font-size:28px;margin:0 0 8px}
+.hero__subtitle{margin:0 0 18px;color:var(--muted)}
+.hero__actions{display:flex;gap:10px;justify-content:center}
+
+/* Mobile-first adjustments */
+@media(min-width:640px){
+  .card{padding:28px}
+  .form__row{flex-direction:row;gap:16px}
+  .form__row .form__label{flex:1}
+  .hero__title{font-size:36px}
+}
+
+/* Small tweaks for form inputs on light theme so borders are visible */
+@media (prefers-color-scheme: light){
+  .form__input{border:1px solid rgba(15,23,42,0.06)}
+  .form__input::placeholder{color:rgba(15,23,42,0.32)}
+}
+
+/* Improve input visibility and focus for light theme and manual html.light */
+@media (prefers-color-scheme: light){
+  .form__input{border:1px solid rgba(15,23,42,0.12);background:linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.01));color:var(--text)}
+  .form__input::placeholder{color:#0b1220}
+}
+
+html.light .form__input{border:1px solid rgba(15,23,42,0.12);background:rgba(255,255,255,0.98);color:var(--text)}
+html.light .form__input::placeholder{color:#0b1220}
+
+/* Focus ring and stronger border on focus */
+.form__input:focus{box-shadow:0 0 0 4px rgba(79,70,229,0.08);border-color:var(--accent)}
+
+/* Slightly narrower card on larger screens for better composition */
+@media(min-width:900px){
+  .card{max-width:440px}
+}
