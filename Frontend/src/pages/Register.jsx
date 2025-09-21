@@ -19,7 +19,7 @@ const Register = () => {
     setLoading(true);
 
     // Replace this URL with your actual backend registration endpoint.
-    const REGISTER_API_URL = "http://localhost:3000/api/auth/register";
+    const REGISTER_API_URL = "https://chat-gpt-clone-x4sk.onrender.com/api/auth/register";
 
     try {
       // Use axios.post to send the user's details to the backend.

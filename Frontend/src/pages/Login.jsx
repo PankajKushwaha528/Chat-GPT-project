@@ -16,7 +16,7 @@ const Login = () => {
     setLoading(true);
 
     // Replace this URL with your actual backend login endpoint.
-    const LOGIN_API_URL = 'http://localhost:3000/api/auth/login';
+    const LOGIN_API_URL = 'https://chat-gpt-clone-x4sk.onrender.com/api/auth/login';
 
     try {
       // Use axios.post to send the user's credentials to the backend.
